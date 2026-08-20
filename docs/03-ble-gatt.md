@@ -98,6 +98,24 @@ suspend fun writeCharacteristic(serviceUuid: UUID, characteristicUuid: UUID, val
 
 A forma é praticamente idêntica à leitura: mesma fila, mesmo `CompletableDeferred`, mesma checagem de retorno imediato (`started`) separada do resultado real (`deferred.await()`, resolvido só quando `onCharacteristicWrite` disparar). A diferença central é onde o dado viaja: na leitura, o valor vem *do* periférico *para* o app, dentro do callback; na escrita, o valor sai do app **antes** da chamada (`characteristic.value = value`), e o callback só confirma se aquele valor chegou (`status == GATT_SUCCESS`) — ele não devolve o dado de volta.
 
+## GATT diz *onde* escrever, nunca *o que os bytes significam*
+
+`writeCharacteristic` é como se manda um "comando" para um dispositivo BLE — não existe uma API separada para "comandos", é a mesma operação de escrita de sempre, só que o valor escrito é interpretado pelo periférico como uma instrução em vez de um dado solto. O que o GATT garante é só a parte estrutural: qual UUID de service, qual UUID de characteristic, e se ela aceita escrita (a flag `PROPERTY_WRITE`, visível ao descobrir os serviços). Ele **não** garante nada sobre o significado dos bytes — isso vem sempre de uma especificação escrita em algum lugar, fora do protocolo em si, e existem dois casos bem diferentes na prática.
+
+**Characteristic padronizada pelo Bluetooth SIG** — o caso de Heart Rate Control Point usado neste projeto. O UUID (`0x2A39`) e o formato do byte (`0x01` = "resetar energia gasta") são públicos, documentados pelo SIG, e valem para o profile inteiro — qualquer fabricante que implemente Heart Rate usa o mesmo UUID com o mesmo significado. Dá para escrever o código sem nunca ter o dispositivo físico na mão, só lendo a especificação.
+
+**Characteristic proprietária de um fabricante** — o caso mais comum em produtos reais (uma fechadura inteligente, uma fita de LED, um wearable com funções além do que qualquer profile padrão cobre). Aqui o fabricante define seus próprios UUIDs e seu próprio formato de byte, geralmente num SDK ou datasheet que não é público — sem esse documento, o GATT sozinho não dá informação nenhuma sobre o que escrever. É comum, inclusive, o fabricante implementar só **duas** characteristics customizadas (uma para escrever, outra que notifica de volta) e tunelar o protocolo inteiro dele por cima delas — um padrão tão frequente que tem nome, "Nordic UART Service" (NUS), mesmo quando não é da Nordic: na prática, é um canal serial genérico dentro do BLE, e o "protocolo de verdade" mora inteiramente dentro dos bytes que trafegam por ele, invisível ao GATT.
+
+## Lidando com um dispositivo real sem a documentação do fabricante
+
+Quando o protocolo é proprietário e a documentação não está disponível, o caminho prático é:
+
+1. **Explorar a tabela GATT primeiro, sem tentar escrever nada.** O [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-mobile) conecta em qualquer dispositivo BLE e lista todos os services/characteristics dele, com as properties de cada uma (`READ`/`WRITE`/`WRITE_NO_RESPONSE`/`NOTIFY`/`INDICATE`) — isso já revela a "forma" do protocolo (quantas characteristics existem, quais aceitam escrita, quais notificam) sem precisar de nenhuma documentação.
+2. **Observar o app oficial do fabricante em ação.** Se existe um app que já controla o dispositivo, capturar um HCI snoop log (`adb bugreport`, ou a opção "Bluetooth HCI snoop log" nas opções de desenvolvedor do Android) enquanto usa esse app registra cada pacote GATT trocado. Abrindo esse log num analisador de protocolo (Wireshark entende o formato), dá para ver exatamente quais bytes o app oficial escreve em qual characteristic para produzir qual efeito — engenharia reversa do protocolo por observação, sem precisar de nenhum acesso ao código-fonte do fabricante.
+3. **Testar hipóteses manualmente.** Com um palpite de formato (um byte de comando, um valor de parâmetro depois), o próprio nRF Connect permite escrever bytes arbitrários numa characteristic e observar a reação do dispositivo — um ciclo de tentativa e erro guiado pelo que já foi aprendido nos passos anteriores.
+
+Nada disso muda o código deste projeto: a fila serializada, o `CompletableDeferred` por operação, e `writeCharacteristic` continuam sendo exatamente o mecanismo certo para enviar qualquer comando, de qualquer protocolo — a única coisa que muda de um dispositivo padronizado para um proprietário é **de onde vêm** o UUID e o formato do byte, não como a escrita é feita.
+
 ## Conectar, descobrir serviços, negociar MTU — nessa ordem
 
 ```kotlin
