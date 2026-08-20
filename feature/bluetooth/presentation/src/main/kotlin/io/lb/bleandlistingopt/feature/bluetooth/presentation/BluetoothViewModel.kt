@@ -42,6 +42,7 @@ class BluetoothViewModel @Inject constructor(
         when (event) {
             BluetoothEvent.OnStartScan -> startScan()
             BluetoothEvent.OnStopScan -> stopScan()
+            BluetoothEvent.OnToggleScanFilter -> toggleScanFilter()
             is BluetoothEvent.OnDeviceClick -> connect(event.address)
             BluetoothEvent.OnReadClick -> read()
             BluetoothEvent.OnToggleNotifications -> toggleNotifications()
@@ -52,13 +53,22 @@ class BluetoothViewModel @Inject constructor(
     private fun startScan() {
         stopScan()
         _state.update { it.copy(devices = emptyList(), isScanning = true) }
+        val filterUuid = if (_state.value.scanFilterEnabled) HEART_RATE_SERVICE_UUID else null
         scanJob = viewModelScope.launch {
-            scanForDevices(serviceUuid = HEART_RATE_SERVICE_UUID).collect { device ->
+            scanForDevices(serviceUuid = filterUuid).collect { device ->
                 _state.update { current ->
                     current.copy(devices = current.devices.filterNot { it.address == device.address } + device)
                 }
             }
         }
+    }
+
+    private fun toggleScanFilter() {
+        val wasScanning = _state.value.isScanning
+        _state.update { it.copy(scanFilterEnabled = !it.scanFilterEnabled) }
+        // Re-applies the new filter immediately if a scan is already
+        // running, instead of only taking effect on the next "Start scan".
+        if (wasScanning) startScan()
     }
 
     private fun stopScan() {

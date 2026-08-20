@@ -18,6 +18,10 @@ nav_order: 4
 
 Definições completas em [`BleGattClient.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/data/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/data/real/BleGattClient.kt).
 
+## Por que "Heart Rate", especificamente
+
+Esse projeto lê e assina notificações de um service/characteristic bem específico em vários lugares — vale explicar o que é, já que aparece sem contexto no código. "Heart Rate" é um **profile GATT padronizado pelo Bluetooth SIG** (a organização dona do padrão Bluetooth): um conjunto fixo de service + characteristics que qualquer monitor de frequência cardíaca do mercado (relógio, cinta de peito, etc.) implementa do mesmo jeito, com os mesmos UUIDs — `0000180d-...` para o service "Heart Rate" e `00002a37-...` para a characteristic "Heart Rate Measurement", exatamente os valores em [`BluetoothViewModel.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/presentation/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/presentation/BluetoothViewModel.kt). Não tem nada a ver com o app medir batimento cardíaco de verdade — foi escolhido porque é um dos profiles BLE mais usados como "hello world" da área, e por isso é o profile que simuladores de periférico (como o nRF Connect, na seção [Testar sem hardware BLE](#testar-sem-hardware-ble) abaixo) já vêm prontos para emular, sem precisar escrever um servidor GATT customizado só para testar este projeto.
+
 ## O gotcha: só uma operação GATT por vez
 
 Toda chamada de `BluetoothGatt` (`discoverServices`, `requestMtu`, `readCharacteristic`, `writeDescriptor`, ...) é assíncrona — ela retorna `true`/`false` na hora ("o pedido entrou na fila do rádio?") e o resultado de verdade chega depois, num método de `BluetoothGattCallback`. Só que a pilha Bluetooth por baixo só processa **uma** operação GATT por vez, por conexão. Disparar uma segunda chamada antes do callback da primeira ter chegado faz a segunda ser descartada, retornar `false`, ou — pior — corromper silenciosamente o estado interno da conexão, porque a pilha não tem onde enfileirar.
@@ -136,13 +140,14 @@ val filters = serviceUuid?.let {
 scanner.startScan(filters, settings, callback)
 ```
 
-E [`BluetoothViewModel.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/presentation/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/presentation/BluetoothViewModel.kt) passa o mesmo UUID de Heart Rate que os botões de leitura já usam:
+E [`BluetoothViewModel.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/presentation/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/presentation/BluetoothViewModel.kt) decide o UUID a partir de um `Switch` na própria tela (`state.scanFilterEnabled`), não de um valor fixo:
 
 ```kotlin
-scanForDevices(serviceUuid = HEART_RATE_SERVICE_UUID).collect { device -> ... }
+val filterUuid = if (_state.value.scanFilterEnabled) HEART_RATE_SERVICE_UUID else null
+scanForDevices(serviceUuid = filterUuid).collect { device -> ... }
 ```
 
-Um `ScanFilter` com `setServiceUuid` não filtra no app depois do scan — ele instrui o **rádio** a descartar anúncios que não declarem aquele service UUID no próprio pacote de advertising, antes mesmo de chegar no callback. Isso tem duas vantagens sobre filtrar a lista na UI depois: menos trabalho para o rádio (e menos bateria gasta processando anúncios que seriam descartados de qualquer jeito) e uma lista que só mostra dispositivos com os quais o app consegue mesmo interagir. O parâmetro é opcional (`serviceUuid: String? = null`) propositalmente — um scanner genérico, sem esse UUID fixo, continua sendo um caso de uso válido, só não é o que essa tela precisa.
+Um `ScanFilter` com `setServiceUuid` não filtra no app depois do scan — ele instrui o **rádio** a descartar anúncios que não declarem aquele service UUID no próprio pacote de advertising, antes mesmo de chegar no callback. Isso tem duas vantagens sobre filtrar a lista na UI depois: menos trabalho para o rádio (e menos bateria gasta processando anúncios que seriam descartados de qualquer jeito) e uma lista que só mostra dispositivos com os quais o app consegue mesmo interagir. O `Switch` "Filtro: Heart Rate" na tela de scan existe justamente para isso ser visível: ligado, mostra só dispositivos com o service de Heart Rate anunciado; desligado, mostra qualquer BLE por perto — dá para comparar as duas listas lado a lado, no mesmo lugar, sem hardware nenhum além do próprio celular.
 
 ## Testar sem hardware BLE
 

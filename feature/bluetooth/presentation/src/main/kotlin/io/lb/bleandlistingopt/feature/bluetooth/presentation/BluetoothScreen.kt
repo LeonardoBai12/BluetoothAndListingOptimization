@@ -13,12 +13,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -75,6 +77,13 @@ fun BluetoothScreen(viewModel: BluetoothViewModel) {
 
 @Composable
 private fun ScanSection(state: BluetoothState, onEvent: (BluetoothEvent) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        // Filtered (default): scan only for devices advertising the Heart
+        // Rate service -- the only ones this screen can read/notify from.
+        // Off: an unfiltered scan, showing every BLE advertisement nearby.
+        Text(if (state.scanFilterEnabled) "Filtro: Heart Rate" else "Filtro: desligado (mostra tudo)")
+        Switch(checked = state.scanFilterEnabled, onCheckedChange = { onEvent(BluetoothEvent.OnToggleScanFilter) })
+    }
     Button(onClick = { onEvent(if (state.isScanning) BluetoothEvent.OnStopScan else BluetoothEvent.OnStartScan) }) {
         Text(if (state.isScanning) "Stop scan" else "Start scan")
     }
