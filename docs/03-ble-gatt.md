@@ -123,6 +123,27 @@ override fun onMtuChanged(connectedGatt: BluetoothGatt, mtu: Int, status: Int) {
 
 `requestMtu(TARGET_MTU)` pede 247 bytes (o teto prático em BLE 4.2+), mas o `mtu` que chega aqui é o valor que **realmente** foi acordado — pode ser 247, pode ser menor, dependendo do que o periférico aceita. Se `status` não for sucesso, o código nem tenta adivinhar um meio-termo: volta para o padrão seguro de 23 bytes (`DEFAULT_ATT_MTU`), porque assumir um valor maior sem confirmação faria transmissões subsequentes falharem. É exatamente esse valor — o que veio no callback, não o que foi pedido — que vira `ConnectionState.Connected(mtu = negotiatedMtu)` em `connect()`.
 
+## Escanear sem filtro mostra qualquer coisa BLE por perto
+
+*Problema* — o scanner original deste projeto chamava `startScan(null, settings, callback)`. Um scan sem `ScanFilter` devolve **todo** anúncio BLE que o rádio conseguir captar por perto — a TV, a impressora do escritório, um fone de ouvido de outra pessoa, qualquer coisa. O app deixa o usuário tocar em "Connect" em qualquer um desses, mas os botões de leitura/notificação estão fixos no service UUID de Heart Rate — conectar numa TV e apertar "Read" só resulta em erro, porque a TV nunca teve esse service para começo de conversa. A lista virava ruído sem relação nenhuma com o que o app realmente sabe fazer.
+
+*Solução* — [`BleScanner.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/data/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/data/real/BleScanner.kt):
+
+```kotlin
+val filters = serviceUuid?.let {
+    listOf(ScanFilter.Builder().setServiceUuid(ParcelUuid(UUID.fromString(it))).build())
+}
+scanner.startScan(filters, settings, callback)
+```
+
+E [`BluetoothViewModel.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/presentation/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/presentation/BluetoothViewModel.kt) passa o mesmo UUID de Heart Rate que os botões de leitura já usam:
+
+```kotlin
+scanForDevices(serviceUuid = HEART_RATE_SERVICE_UUID).collect { device -> ... }
+```
+
+Um `ScanFilter` com `setServiceUuid` não filtra no app depois do scan — ele instrui o **rádio** a descartar anúncios que não declarem aquele service UUID no próprio pacote de advertising, antes mesmo de chegar no callback. Isso tem duas vantagens sobre filtrar a lista na UI depois: menos trabalho para o rádio (e menos bateria gasta processando anúncios que seriam descartados de qualquer jeito) e uma lista que só mostra dispositivos com os quais o app consegue mesmo interagir. O parâmetro é opcional (`serviceUuid: String? = null`) propositalmente — um scanner genérico, sem esse UUID fixo, continua sendo um caso de uso válido, só não é o que essa tela precisa.
+
 ## Testar sem hardware BLE
 
 Emuladores Android não têm rádio Bluetooth real — `BluetoothAdapter.getBluetoothLeScanner()` retorna `null` ou um scanner que não encontra nada. Teste em hardware real precisa de um dispositivo físico e um periférico BLE por perto — o app [nRF Connect](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-mobile) em modo periférico, simulando o profile padrão de Heart Rate, é o mais simples de usar (é literalmente o profile que [`BluetoothViewModel.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/presentation/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/presentation/BluetoothViewModel.kt) usa).

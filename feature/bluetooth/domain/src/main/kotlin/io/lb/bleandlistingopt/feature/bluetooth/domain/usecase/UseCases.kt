@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 
 class ScanForDevicesUseCase @Inject constructor(private val repository: BleRepository) {
-    operator fun invoke(): Flow<BleDevice> = repository.scanForDevices()
+    operator fun invoke(serviceUuid: String? = null): Flow<BleDevice> = repository.scanForDevices(serviceUuid)
 }
 
 class ConnectToDeviceUseCase @Inject constructor(private val repository: BleRepository) {

@@ -53,7 +53,7 @@ class BluetoothViewModel @Inject constructor(
         stopScan()
         _state.update { it.copy(devices = emptyList(), isScanning = true) }
         scanJob = viewModelScope.launch {
-            scanForDevices().collect { device ->
+            scanForDevices(serviceUuid = HEART_RATE_SERVICE_UUID).collect { device ->
                 _state.update { current ->
                     current.copy(devices = current.devices.filterNot { it.address == device.address } + device)
                 }

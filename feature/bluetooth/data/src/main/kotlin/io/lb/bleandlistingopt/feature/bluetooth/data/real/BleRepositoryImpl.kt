@@ -27,7 +27,7 @@ class BleRepositoryImpl @Inject constructor(
     // connection, not across independent connections to different devices.
     private val clients = mutableMapOf<String, BleGattClient>()
 
-    override fun scanForDevices(): Flow<BleDevice> = scanner.scan()
+    override fun scanForDevices(serviceUuid: String?): Flow<BleDevice> = scanner.scan(serviceUuid)
 
     override fun observeConnectionState(address: String): Flow<ConnectionState> =
         clientFor(address).connectionState

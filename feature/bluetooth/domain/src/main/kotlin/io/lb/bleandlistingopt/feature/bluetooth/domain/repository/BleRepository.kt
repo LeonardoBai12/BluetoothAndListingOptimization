@@ -7,7 +7,7 @@ import io.lb.bleandlistingopt.feature.bluetooth.domain.model.ConnectionState
 import kotlinx.coroutines.flow.Flow
 
 interface BleRepository {
-    fun scanForDevices(): Flow<BleDevice>
+    fun scanForDevices(serviceUuid: String? = null): Flow<BleDevice>
     fun observeConnectionState(address: String): Flow<ConnectionState>
     suspend fun connect(address: String): Resource<Unit>
     suspend fun disconnect(address: String)
