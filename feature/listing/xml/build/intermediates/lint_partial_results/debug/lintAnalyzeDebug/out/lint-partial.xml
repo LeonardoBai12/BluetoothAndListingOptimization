@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 9.2.1" type="partial_results">
+    <map id="UnusedResources">
+        <entry
+            name="model"
+            string="id[searchEditText(U),listingRecyclerView(U),titleText(U),priceText(U),subtitleText(U),favoriteCheckbox(U),tagsRecyclerView(U),tagText(U)],layout[activity_optimized_recycler(U),activity_unoptimized_recycler(U),item_listing_optimized(U),item_listing_unoptimized(U),item_tag_chip(U)];a^3^2^5^4;;;"/>
+    </map>
+
+</incidents>

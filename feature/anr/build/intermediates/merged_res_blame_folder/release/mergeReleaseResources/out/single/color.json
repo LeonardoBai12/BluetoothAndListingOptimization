@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "io.lb.bleandlistingopt.feature.anr-release-32:/color/vector_tint_theme_color.xml",
+        "source": "io.lb.bleandlistingopt.feature.anr-ui-5:/color/vector_tint_theme_color.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.feature.anr-release-32:/color/vector_tint_color.xml",
+        "source": "io.lb.bleandlistingopt.feature.anr-ui-5:/color/vector_tint_color.xml"
+    }
+]

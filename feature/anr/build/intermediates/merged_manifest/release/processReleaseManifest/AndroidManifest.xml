@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.lb.bleandlistingopt.feature.anr" >
+
+    <uses-sdk android:minSdkVersion="24" />
+
+    <application>
+        <activity
+            android:name="io.lb.bleandlistingopt.feature.anr.AnrLabActivity"
+            android:exported="false" />
+    </application>
+
+</manifest>

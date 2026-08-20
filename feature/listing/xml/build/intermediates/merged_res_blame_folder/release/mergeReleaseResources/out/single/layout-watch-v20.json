@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "io.lb.bleandlistingopt.feature.listing.xml-release-38:/layout-watch-v20/abc_alert_dialog_title_material.xml",
+        "source": "io.lb.bleandlistingopt.feature.listing.xml-appcompat-1.8.0-6:/layout-watch-v20/abc_alert_dialog_title_material.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.feature.listing.xml-release-38:/layout-watch-v20/abc_alert_dialog_button_bar_material.xml",
+        "source": "io.lb.bleandlistingopt.feature.listing.xml-appcompat-1.8.0-6:/layout-watch-v20/abc_alert_dialog_button_bar_material.xml"
+    }
+]

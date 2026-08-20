@@ -1,0 +1,56 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:1:1-26:12
+INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:1:1-26:12
+	package
+		INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml
+	xmlns:tools
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:2:5-51
+	xmlns:android
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:1:11-69
+uses-permission#android.permission.BLUETOOTH
+ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:7:5-95
+	android:maxSdkVersion
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:7:66-92
+	android:name
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:7:22-65
+uses-permission#android.permission.BLUETOOTH_ADMIN
+ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:8:5-101
+	android:maxSdkVersion
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:8:72-98
+	android:name
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:8:22-71
+uses-permission#android.permission.ACCESS_FINE_LOCATION
+ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:9:5-106
+	android:maxSdkVersion
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:9:77-103
+	android:name
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:9:22-76
+uses-permission#android.permission.BLUETOOTH_SCAN
+ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:15:5-18:31
+	android:usesPermissionFlags
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:17:9-55
+	tools:targetApi
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:18:9-28
+	android:name
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:16:9-57
+uses-permission#android.permission.BLUETOOTH_CONNECT
+ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:19:5-76
+	android:name
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:19:22-73
+application
+ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:21:5-25:19
+activity#io.lb.bleandlistingopt.feature.bluetooth.presentation.BluetoothActivity
+ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:22:9-24:40
+	android:exported
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:24:13-37
+	android:name
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml:23:13-46
+uses-sdk
+INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml
+INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/presentation/src/main/AndroidManifest.xml

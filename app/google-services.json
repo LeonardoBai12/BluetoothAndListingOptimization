@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "409306436285",
+    "project_id": "blestudy",
+    "storage_bucket": "blestudy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:409306436285:android:2f5fc77f8f2fcdfe081dd4",
+        "android_client_info": {
+          "package_name": "io.lb.bleandlistingopt"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkfhrjP1iFNyBdF35HIE5qfuDamDOCXS4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

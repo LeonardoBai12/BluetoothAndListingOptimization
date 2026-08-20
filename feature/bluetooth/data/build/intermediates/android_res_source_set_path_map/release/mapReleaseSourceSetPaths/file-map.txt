@@ -1,0 +1,9 @@
+io.lb.bleandlistingopt.feature.bluetooth.data-pngs-0 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/data/build/generated/res/pngs/release
+io.lb.bleandlistingopt.feature.bluetooth.data-updated_navigation_xml-1 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/data/build/generated/updated_navigation_xml/release
+io.lb.bleandlistingopt.feature.bluetooth.data-mergeReleaseResources-2 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/data/build/intermediates/incremental/release/mergeReleaseResources/merged.dir
+io.lb.bleandlistingopt.feature.bluetooth.data-mergeReleaseResources-3 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/data/build/intermediates/incremental/release/mergeReleaseResources/stripped.dir
+io.lb.bleandlistingopt.feature.bluetooth.data-release-4 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/data/build/intermediates/merged_res/release/mergeReleaseResources
+io.lb.bleandlistingopt.feature.bluetooth.data-release-5 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/data/build/intermediates/packaged_res/release/packageReleaseResources
+io.lb.bleandlistingopt.feature.bluetooth.data-main-6 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/data/src/main/res
+io.lb.bleandlistingopt.feature.bluetooth.data-release-7 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/bluetooth/data/src/release/res
+gradleHome-0 /Users/leonardobai/.gradle

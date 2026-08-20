@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "io.lb.bleandlistingopt.core.designsystem-release-32:/color/vector_tint_theme_color.xml",
+        "source": "io.lb.bleandlistingopt.core.designsystem-ui-7:/color/vector_tint_theme_color.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.core.designsystem-release-32:/color/vector_tint_color.xml",
+        "source": "io.lb.bleandlistingopt.core.designsystem-ui-7:/color/vector_tint_color.xml"
+    }
+]

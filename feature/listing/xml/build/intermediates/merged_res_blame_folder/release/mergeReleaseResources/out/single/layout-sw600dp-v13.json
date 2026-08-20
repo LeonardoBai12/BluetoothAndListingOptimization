@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "io.lb.bleandlistingopt.feature.listing.xml-release-38:/layout-sw600dp-v13/mtrl_layout_snackbar.xml",
+        "source": "io.lb.bleandlistingopt.feature.listing.xml-material-1.14.0-12:/layout-sw600dp-v13/mtrl_layout_snackbar.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.feature.listing.xml-release-38:/layout-sw600dp-v13/design_layout_snackbar.xml",
+        "source": "io.lb.bleandlistingopt.feature.listing.xml-material-1.14.0-12:/layout-sw600dp-v13/design_layout_snackbar.xml"
+    }
+]

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="io.lb.bleandlistingopt.feature.bluetooth.presentation" >
+
+    <uses-sdk android:minSdkVersion="24" />
+
+    <!--
+    API 30 and below: BLUETOOTH/BLUETOOTH_ADMIN are normal (install-time)
+    permissions, but scanning also needs runtime-requested location because
+    the OS treats BLE scan results as potentially location-revealing.
+    -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="30" />
+
+    <!--
+    API 31+: BLUETOOTH_SCAN/CONNECT replace the permissions above.
+    `neverForLocation` declares this app doesn't derive physical location
+    from scan results, which is what lets BLUETOOTH_SCAN be requested
+    without also requesting ACCESS_FINE_LOCATION on these versions.
+    -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+    <application>
+        <activity
+            android:name="io.lb.bleandlistingopt.feature.bluetooth.presentation.BluetoothActivity"
+            android:exported="false" />
+    </application>
+
+</manifest>

@@ -1,0 +1,30 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml:1:1-10:12
+INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml:1:1-10:12
+	package
+		INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml:1:11-69
+application
+ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml:2:5-9:19
+activity#io.lb.bleandlistingopt.feature.listing.xml.UnoptimizedRecyclerActivity
+ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml:3:9-5:40
+	android:exported
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml:5:13-37
+	android:name
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml:4:13-56
+activity#io.lb.bleandlistingopt.feature.listing.xml.OptimizedRecyclerActivity
+ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml:6:9-8:40
+	android:exported
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml:8:13-37
+	android:name
+		ADDED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml:7:13-54
+uses-sdk
+INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml
+INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/listing/xml/src/main/AndroidManifest.xml

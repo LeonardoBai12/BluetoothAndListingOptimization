@@ -1,0 +1,46 @@
+[
+    {
+        "merged": "io.lb.bleandlistingopt.feature.bluetooth.presentation-release-36:/drawable/notification_bg.xml",
+        "source": "io.lb.bleandlistingopt.feature.bluetooth.presentation-core-1.19.0-7:/drawable/notification_bg.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.feature.bluetooth.presentation-release-36:/drawable/notification_action_background.xml",
+        "source": "io.lb.bleandlistingopt.feature.bluetooth.presentation-core-1.19.0-7:/drawable/notification_action_background.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.feature.bluetooth.presentation-release-36:/drawable/ic_call_answer_low.xml",
+        "source": "io.lb.bleandlistingopt.feature.bluetooth.presentation-core-1.19.0-7:/drawable/ic_call_answer_low.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.feature.bluetooth.presentation-release-36:/drawable/notification_bg_low.xml",
+        "source": "io.lb.bleandlistingopt.feature.bluetooth.presentation-core-1.19.0-7:/drawable/notification_bg_low.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.feature.bluetooth.presentation-release-36:/drawable/notification_tile_bg.xml",
+        "source": "io.lb.bleandlistingopt.feature.bluetooth.presentation-core-1.19.0-7:/drawable/notification_tile_bg.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.feature.bluetooth.presentation-release-36:/drawable/ic_call_decline_low.xml",
+        "source": "io.lb.bleandlistingopt.feature.bluetooth.presentation-core-1.19.0-7:/drawable/ic_call_decline_low.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.feature.bluetooth.presentation-release-36:/drawable/notification_icon_background.xml",
+        "source": "io.lb.bleandlistingopt.feature.bluetooth.presentation-core-1.19.0-7:/drawable/notification_icon_background.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.feature.bluetooth.presentation-release-36:/drawable/ic_call_answer_video.xml",
+        "source": "io.lb.bleandlistingopt.feature.bluetooth.presentation-core-1.19.0-7:/drawable/ic_call_answer_video.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.feature.bluetooth.presentation-release-36:/drawable/ic_call_answer_video_low.xml",
+        "source": "io.lb.bleandlistingopt.feature.bluetooth.presentation-core-1.19.0-7:/drawable/ic_call_answer_video_low.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.feature.bluetooth.presentation-release-36:/drawable/ic_call_decline.xml",
+        "source": "io.lb.bleandlistingopt.feature.bluetooth.presentation-core-1.19.0-7:/drawable/ic_call_decline.xml"
+    },
+    {
+        "merged": "io.lb.bleandlistingopt.feature.bluetooth.presentation-release-36:/drawable/ic_call_answer.xml",
+        "source": "io.lb.bleandlistingopt.feature.bluetooth.presentation-core-1.19.0-7:/drawable/ic_call_answer.xml"
+    }
+]

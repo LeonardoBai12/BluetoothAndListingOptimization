@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.lb.bleandlistingopt.feature.listing.compose" >
+
+    <uses-sdk android:minSdkVersion="24" />
+
+    <application>
+        <activity
+            android:name="io.lb.bleandlistingopt.feature.listing.compose.UnoptimizedListActivity"
+            android:exported="false" />
+        <activity
+            android:name="io.lb.bleandlistingopt.feature.listing.compose.OptimizedListActivity"
+            android:exported="false" />
+    </application>
+
+</manifest>
