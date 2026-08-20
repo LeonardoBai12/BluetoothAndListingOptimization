@@ -147,6 +147,54 @@ As duas threads agora travam `lockA` primeiro, sempre. Sem espera circular poss�
 
 Repare que os 4 problemas **e** as 4 soluções reaproveitam o mesmo trabalho de base (`countPrimesFor`, `blockingDiskWork`, os mesmos `lockA`/`lockB`). Isso não é coincidência — é o que prova que o problema nunca foi *o que* o código faz, e sim *em qual thread* ele roda.
 
+## StrictMode: o que é, e por que está aqui
+
+`StrictMode` é uma ferramenta de desenvolvimento do próprio Android que instrumenta chamadas específicas — leitura/escrita de disco, chamadas de rede — feitas na main thread, e reage quando encontra uma. Ela existe porque nem todo "trabalho lento na main thread" é óbvio no código: um `SharedPreferences.getString()` parece inofensivo, mas por baixo é uma leitura de disco; uma chamada de biblioteca de terceiros pode esconder uma requisição de rede síncrona. StrictMode pega esses casos automaticamente, sem precisar saber de antemão onde procurar.
+
+Ela é ativada só na tela do ANR Lab ([`AnrLabActivity.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/anr/src/main/kotlin/io/lb/bleandlistingopt/feature/anr/AnrLabActivity.kt)), não no app inteiro, e por um motivo concreto: ligá-la assim que o processo inicia (em `BleLabApplication`) pegava chamadas de disco/rede legítimas do próprio Firebase e do Dagger durante a inicialização — nada relacionado a nenhum anti-padrão deste projeto, só ruído, disparando o alerta em toda abertura do app.
+
+```kotlin
+fun enableStrictMode() {
+    StrictMode.setThreadPolicy(
+        StrictMode.ThreadPolicy.Builder()
+            .detectDiskReads()
+            .detectDiskWrites()
+            .detectNetwork()
+            .penaltyLog()
+            .build(),
+    )
+    StrictMode.setVmPolicy(
+        StrictMode.VmPolicy.Builder()
+            .detectLeakedSqlLiteObjects()
+            .detectLeakedClosableObjects()
+            .penaltyLog()
+            .build(),
+    )
+}
+```
+
+`penaltyLog()` só escreve a violação no Logcat (com o `Thread.sleep()`/CPU-loop/deadlock deste laboratório, ela não pega nada — só instrumenta chamadas de I/O, não "a thread ficou bloqueada"; é exatamente por isso que o timeout de ANR existe separadamente, para cobrir esse resto). O par "Escrita bloqueante em disco" é o único dos quatro que StrictMode consegue sinalizar sozinha, mesmo sem o app ter medido 6 segundos.
+
+### Um gotcha real, encontrado testando este próprio guia
+
+A primeira versão desta tela também usava `penaltyDialog()`, que mostra um diálogo modal na hora que a violação acontece — a opção mais visível, e a que o par teórico "penaltyLog + penaltyDialog" sempre descreve junto. Só que, testando no dispositivo, isso causou um ANR real e reprodutível: o próprio diálogo do StrictMode, sendo modal, bloqueia brevemente o despacho de eventos de input — e esse bloqueio sozinho foi suficiente para o *watchdog de ANR do sistema* (que é um mecanismo totalmente separado de StrictMode) entender que a `Activity` parou de responder, e abrir o diálogo genuíno de "app não está respondendo". Uma ferramenta de debug ativando o exato problema que ela existe para ajudar a diagnosticar.
+
+A correção foi tirar `penaltyDialog()` e manter só `penaltyLog()`, que nunca bloqueia nada — só escreve no Logcat. Um segundo problema, relacionado mas distinto, apareceu junto: `StrictMode.setThreadPolicy`/`setVmPolicy` são configurações **globais do processo**, não presas ao ciclo de vida de uma `Activity`. Chamar `enableStrictMode()` só uma vez em `onCreate()` deixava a política ativa para sempre depois disso, em qualquer tela — inclusive telas de Bluetooth/Listagem sem relação nenhuma com o ANR Lab. A correção foi ligar em `onResume()` e desligar em `onPause()`:
+
+```kotlin
+override fun onResume() {
+    super.onResume()
+    enableStrictMode()
+}
+
+override fun onPause() {
+    disableStrictMode()
+    super.onPause()
+}
+```
+
+`disableStrictMode()` restaura a política padrão (`StrictMode.ThreadPolicy.LAX`/`VmPolicy.LAX`) ao sair da tela, então "ativado" volta a significar, de verdade, "enquanto esta tela estiver em primeiro plano" — não "a partir de agora, para sempre, neste processo".
+
 ## Debugando: Android Studio
 
 - **Profiler → Threads, ao vivo.** Abra o Profiler (View → Tool Windows → Profiler) *antes* de tocar em "Trigger ANR" e olhe a aba Threads. A thread `main` muda de verde para amarelo/vermelho assim que entra em `Thread.sleep`/trabalho de CPU/I/O. No **Par 4 (deadlock)**, é aqui que fica mais óbvio: o Profiler desenha as duas threads bloqueadas uma na outra, com o ícone de lock indicando exatamente qual monitor cada uma está esperando — é a forma mais rápida de *ver* uma espera circular sem precisar ler stack trace nenhuma.

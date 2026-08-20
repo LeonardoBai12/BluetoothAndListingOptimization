@@ -9,6 +9,7 @@ import io.lb.bleandlistingopt.feature.bluetooth.domain.usecase.ObserveConnection
 import io.lb.bleandlistingopt.feature.bluetooth.domain.usecase.ObserveNotificationsUseCase
 import io.lb.bleandlistingopt.feature.bluetooth.domain.usecase.ReadCharacteristicUseCase
 import io.lb.bleandlistingopt.feature.bluetooth.domain.usecase.ScanForDevicesUseCase
+import io.lb.bleandlistingopt.feature.bluetooth.domain.usecase.WriteCharacteristicUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +26,7 @@ class BluetoothViewModel @Inject constructor(
     private val connectToDevice: ConnectToDeviceUseCase,
     private val observeConnectionState: ObserveConnectionStateUseCase,
     private val readCharacteristic: ReadCharacteristicUseCase,
+    private val writeCharacteristic: WriteCharacteristicUseCase,
     private val observeNotifications: ObserveNotificationsUseCase,
     private val disconnectUseCase: DisconnectUseCase,
 ) : ViewModel() {
@@ -45,6 +47,7 @@ class BluetoothViewModel @Inject constructor(
             BluetoothEvent.OnToggleScanFilter -> toggleScanFilter()
             is BluetoothEvent.OnDeviceClick -> connect(event.address)
             BluetoothEvent.OnReadClick -> read()
+            BluetoothEvent.OnResetEnergyClick -> resetEnergyExpended()
             BluetoothEvent.OnToggleNotifications -> toggleNotifications()
             BluetoothEvent.OnDisconnectClick -> disconnectDevice()
         }
@@ -105,6 +108,26 @@ class BluetoothViewModel @Inject constructor(
         }
     }
 
+    // Heart Rate Control Point is the one writable characteristic in the
+    // standard Heart Rate profile: writing 0x01 to it asks the peripheral to
+    // reset its accumulated "Energy Expended" counter back to zero. Chosen
+    // for this demo precisely because it's the only standard write target
+    // this profile has -- everything else in it is read/notify-only.
+    private fun resetEnergyExpended() {
+        val address = _state.value.selectedAddress ?: return
+        viewModelScope.launch {
+            val result = writeCharacteristic(
+                address,
+                HEART_RATE_SERVICE_UUID,
+                HEART_RATE_CONTROL_POINT_UUID,
+                byteArrayOf(0x01),
+            )
+            if (result is Resource.Error) {
+                _effects.emit(BluetoothEffect.ShowError(result.message ?: "Write failed"))
+            }
+        }
+    }
+
     private fun toggleNotifications() {
         val currentJob = notificationsJob
         if (currentJob != null) {
@@ -150,5 +173,6 @@ class BluetoothViewModel @Inject constructor(
         // comment for what GATT/service/characteristic mean).
         const val HEART_RATE_SERVICE_UUID = "0000180d-0000-1000-8000-00805f9b34fb"
         const val HEART_RATE_MEASUREMENT_UUID = "00002a37-0000-1000-8000-00805f9b34fb"
+        const val HEART_RATE_CONTROL_POINT_UUID = "00002a39-0000-1000-8000-00805f9b34fb"
     }
 }

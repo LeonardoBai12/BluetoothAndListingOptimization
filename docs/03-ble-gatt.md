@@ -76,6 +76,28 @@ override fun onCharacteristicRead(
 
 Note o nome do parâmetro do callback: `connectedGatt`, não a letra solta `g` que a documentação da Android costuma usar — nenhum desses callbacks precisa do campo `gatt` da classe, só da instância de conexão que o sistema acabou de devolver para aquele evento específico.
 
+## Escrever numa characteristic
+
+Ler e escrever seguem o mesmo padrão (`CompletableDeferred` + fila), mas nem toda characteristic aceita as duas operações — o profile Heart Rate usado neste projeto só tem uma que aceita escrita: "Heart Rate Control Point" (`0x2A39`), que reseta o contador de energia gasta acumulada pelo periférico quando recebe o byte `0x01`. É esse o botão "Reset energy expended" na tela de Bluetooth.
+
+```kotlin
+@Suppress("DEPRECATION") // o overload de 3 argumentos writeCharacteristic(characteristic, value, writeType) pede API 33; minSdk aqui é 24
+suspend fun writeCharacteristic(serviceUuid: UUID, characteristicUuid: UUID, value: ByteArray): Resource<Unit> =
+    operationQueue.enqueue {
+        val characteristic = gatt?.getService(serviceUuid)?.getCharacteristic(characteristicUuid)
+            ?: return@enqueue Resource.Error("Characteristic not found")
+
+        val deferred = CompletableDeferred<Boolean>()
+        pendingWrite = deferred
+        characteristic.value = value
+        val started = gatt?.writeCharacteristic(characteristic) ?: false
+        if (!started) return@enqueue Resource.Error("writeCharacteristic() rejected -- radio busy or disconnected")
+        if (deferred.await()) Resource.Success(Unit) else Resource.Error("Write failed")
+    }
+```
+
+A forma é praticamente idêntica à leitura: mesma fila, mesmo `CompletableDeferred`, mesma checagem de retorno imediato (`started`) separada do resultado real (`deferred.await()`, resolvido só quando `onCharacteristicWrite` disparar). A diferença central é onde o dado viaja: na leitura, o valor vem *do* periférico *para* o app, dentro do callback; na escrita, o valor sai do app **antes** da chamada (`characteristic.value = value`), e o callback só confirma se aquele valor chegou (`status == GATT_SUCCESS`) — ele não devolve o dado de volta.
+
 ## Conectar, descobrir serviços, negociar MTU — nessa ordem
 
 ```kotlin
@@ -112,6 +134,12 @@ suspend fun connect(): Resource<Unit> {
 ```
 
 `connectGatt()` cria a conexão em si e não passa pela fila (nada existe ainda para serializar contra); a descoberta de serviços e a negociação de MTU acontecem depois, cada uma pela fila, uma de cada vez.
+
+## O segundo argumento de `connectGatt`, `autoConnect`
+
+`device.connectGatt(context, false, callback)` — esse `false` é uma decisão real, fácil de inverter sem perceber, e o Android não avisa quando você escolhe o valor errado. `autoConnect = false` (o que este projeto usa) é uma conexão **direta**: rápida, mas falha na hora se o dispositivo não estiver alcançável *agora*, no exato momento da chamada. `autoConnect = true` é uma conexão em **segundo plano**: o sistema operacional guarda o pedido e fica tentando reconectar sozinho, silenciosamente, sempre que aquele dispositivo entrar no alcance — só que a primeira conexão bem-sucedida demora muito mais para acontecer, porque ela passa por um caminho interno do stack Bluetooth otimizado para espera longa, não para resposta rápida.
+
+A escolha certa depende do que o usuário acabou de fazer: `false` é certo aqui porque o fluxo é "o usuário tocou em Connect num dispositivo que a tela literalmente acabou de ver no scan" — está por perto, agora. `true` seria certo para "reconectar automaticamente com um dispositivo já pareado sempre que ele aparecer", como uma pulseira fitness que entra e sai de alcance ao longo do dia sem o usuário abrir o app de novo. Trocar os dois deixa sintomas confusos: usar `true` para um connect que devia ser imediato faz a conexão parecer "lenta" ou "travada" sem motivo aparente; usar `false` para reconexão automática nunca reconecta sozinho, exigindo o app chamar `connect()` de novo na mão toda vez.
 
 ## O que "negociar MTU" quer dizer, de verdade
 

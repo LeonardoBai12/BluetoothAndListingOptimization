@@ -47,7 +47,7 @@ private const val DEFAULT_ATT_MTU = 23
  *   `requestMtu` before the connection is considered ready.
  *
  * Every call that talks to the radio (`discoverServices`, `requestMtu`,
- * `readCharacteristic`, `writeDescriptor`) is routed through
+ * `readCharacteristic`, `writeCharacteristic`, `writeDescriptor`) is routed through
  * [operationQueue] -- see [GattOperationQueue] for why that's required, not
  * optional, once more than one such call can happen in a connection's
  * lifetime.
@@ -67,6 +67,7 @@ class BleGattClient(
     private var pendingServiceDiscovery: CompletableDeferred<Boolean>? = null
     private var pendingMtu: CompletableDeferred<Int>? = null
     private var pendingRead: CompletableDeferred<Resource<CharacteristicValue>>? = null
+    private var pendingWrite: CompletableDeferred<Boolean>? = null
     private var pendingDescriptorWrite: CompletableDeferred<Boolean>? = null
 
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
@@ -119,6 +120,14 @@ class BleGattClient(
                 Resource.Error("Read failed, status=$status")
             }
             pendingRead?.complete(result)
+        }
+
+        override fun onCharacteristicWrite(
+            connectedGatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            status: Int,
+        ) {
+            pendingWrite?.complete(status == BluetoothGatt.GATT_SUCCESS)
         }
 
         override fun onDescriptorWrite(connectedGatt: BluetoothGatt, descriptor: BluetoothGattDescriptor, status: Int) {
@@ -185,6 +194,20 @@ class BleGattClient(
             val started = gatt?.readCharacteristic(characteristic) ?: false
             if (!started) return@enqueue Resource.Error("readCharacteristic() rejected -- radio busy or disconnected")
             deferred.await()
+        }
+
+    @Suppress("DEPRECATION") // the three-arg writeCharacteristic(characteristic, value, writeType) needs API 33; minSdk here is 24
+    suspend fun writeCharacteristic(serviceUuid: UUID, characteristicUuid: UUID, value: ByteArray): Resource<Unit> =
+        operationQueue.enqueue {
+            val characteristic = gatt?.getService(serviceUuid)?.getCharacteristic(characteristicUuid)
+                ?: return@enqueue Resource.Error("Characteristic not found")
+
+            val deferred = CompletableDeferred<Boolean>()
+            pendingWrite = deferred
+            characteristic.value = value
+            val started = gatt?.writeCharacteristic(characteristic) ?: false
+            if (!started) return@enqueue Resource.Error("writeCharacteristic() rejected -- radio busy or disconnected")
+            if (deferred.await()) Resource.Success(Unit) else Resource.Error("Write failed")
         }
 
     @Suppress("DEPRECATION") // the two-arg writeDescriptor(descriptor, value) needs API 33; minSdk here is 24

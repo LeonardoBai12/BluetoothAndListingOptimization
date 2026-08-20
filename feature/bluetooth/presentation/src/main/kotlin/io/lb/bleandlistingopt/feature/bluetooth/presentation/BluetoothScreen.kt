@@ -108,6 +108,9 @@ private fun ConnectionSection(state: BluetoothState, onEvent: (BluetoothEvent) -
         Button(onClick = { onEvent(BluetoothEvent.OnReadClick) }) {
             Text("Read heart rate characteristic")
         }
+        Button(onClick = { onEvent(BluetoothEvent.OnResetEnergyClick) }) {
+            Text("Reset energy expended (write)")
+        }
         Button(onClick = { onEvent(BluetoothEvent.OnToggleNotifications) }) {
             Text(if (state.isObservingNotifications) "Stop notifications" else "Start notifications")
         }

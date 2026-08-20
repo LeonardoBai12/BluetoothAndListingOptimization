@@ -45,6 +45,14 @@ class BleRepositoryImpl @Inject constructor(
     ): Resource<CharacteristicValue> =
         clientFor(address).readCharacteristic(UUID.fromString(serviceUuid), UUID.fromString(characteristicUuid))
 
+    override suspend fun writeCharacteristic(
+        address: String,
+        serviceUuid: String,
+        characteristicUuid: String,
+        value: ByteArray,
+    ): Resource<Unit> =
+        clientFor(address).writeCharacteristic(UUID.fromString(serviceUuid), UUID.fromString(characteristicUuid), value)
+
     override fun observeNotifications(
         address: String,
         serviceUuid: String,

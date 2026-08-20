@@ -11,7 +11,6 @@ import io.lb.bleandlistingopt.core.designsystem.theme.BleLabTheme
 class AnrLabActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableStrictMode()
         setContent {
             BleLabTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -19,5 +18,17 @@ class AnrLabActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    // Enabled/disabled around the foreground window, not just once in
+    // onCreate -- see disableStrictMode() for why that distinction matters.
+    override fun onResume() {
+        super.onResume()
+        enableStrictMode()
+    }
+
+    override fun onPause() {
+        disableStrictMode()
+        super.onPause()
     }
 }

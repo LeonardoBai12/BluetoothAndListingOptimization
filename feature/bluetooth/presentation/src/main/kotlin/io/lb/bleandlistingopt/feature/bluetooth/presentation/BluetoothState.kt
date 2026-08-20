@@ -24,6 +24,7 @@ sealed interface BluetoothEvent {
     data object OnToggleScanFilter : BluetoothEvent
     data class OnDeviceClick(val address: String) : BluetoothEvent
     data object OnReadClick : BluetoothEvent
+    data object OnResetEnergyClick : BluetoothEvent
     data object OnToggleNotifications : BluetoothEvent
     data object OnDisconnectClick : BluetoothEvent
 }

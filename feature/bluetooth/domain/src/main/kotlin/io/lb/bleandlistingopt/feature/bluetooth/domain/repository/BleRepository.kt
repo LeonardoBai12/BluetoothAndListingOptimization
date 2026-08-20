@@ -18,6 +18,13 @@ interface BleRepository {
         characteristicUuid: String,
     ): Resource<CharacteristicValue>
 
+    suspend fun writeCharacteristic(
+        address: String,
+        serviceUuid: String,
+        characteristicUuid: String,
+        value: ByteArray,
+    ): Resource<Unit>
+
     fun observeNotifications(
         address: String,
         serviceUuid: String,

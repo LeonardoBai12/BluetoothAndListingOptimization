@@ -34,6 +34,15 @@ class ReadCharacteristicUseCase @Inject constructor(private val repository: BleR
     ): Resource<CharacteristicValue> = repository.readCharacteristic(address, serviceUuid, characteristicUuid)
 }
 
+class WriteCharacteristicUseCase @Inject constructor(private val repository: BleRepository) {
+    suspend operator fun invoke(
+        address: String,
+        serviceUuid: String,
+        characteristicUuid: String,
+        value: ByteArray,
+    ): Resource<Unit> = repository.writeCharacteristic(address, serviceUuid, characteristicUuid, value)
+}
+
 class ObserveNotificationsUseCase @Inject constructor(private val repository: BleRepository) {
     operator fun invoke(
         address: String,
