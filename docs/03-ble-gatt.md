@@ -14,7 +14,7 @@ nav_order: 4
 - **Service**: um grupo nomeado de valores relacionados que um periférico expõe (ex: "Heart Rate"), identificado por um UUID.
 - **Characteristic**: um valor legível/gravável/notificável dentro de um service (ex: "Heart Rate Measurement"), também identificado por UUID.
 - **Descriptor**: metadado ligado a uma characteristic. O que este projeto grava, em `enableNotifications`, é o descriptor "Client Characteristic Configuration" — gravar o valor mágico `BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE` nele é literalmente como um cliente BLE diz ao periférico "comece a me mandar atualizações dessa characteristic".
-- **MTU** (Maximum Transmission Unit): o maior número de bytes que um pacote BLE carrega. O padrão é 23 bytes (20 utilizáveis); por isso o `connect()` negocia um MTU maior antes de considerar a conexão pronta.
+- **MTU** (Maximum Transmission Unit): o maior número de bytes que um pacote BLE consegue carregar numa única transmissão. Todo valor de characteristic maior que o MTU disponível precisa ser fragmentado em múltiplos pacotes, o que significa mais idas e vindas de rádio para transferir o mesmo dado. Detalhes de como esse número é definido (não é fixo, é "negociado") na seção [O que "negociar MTU" quer dizer, de verdade](#o-que-negociar-mtu-quer-dizer-de-verdade) mais abaixo.
 
 Definições completas em [`BleGattClient.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/data/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/data/real/BleGattClient.kt).
 
@@ -108,6 +108,20 @@ suspend fun connect(): Resource<Unit> {
 ```
 
 `connectGatt()` cria a conexão em si e não passa pela fila (nada existe ainda para serializar contra); a descoberta de serviços e a negociação de MTU acontecem depois, cada uma pela fila, uma de cada vez.
+
+## O que "negociar MTU" quer dizer, de verdade
+
+Toda conexão BLE começa com um MTU de 23 bytes (20 úteis, depois de descontar o cabeçalho do protocolo ATT) — um valor pequeno de propósito, para garantir que qualquer dispositivo, mesmo o mais limitado, consiga participar de uma conexão. Esse valor pequeno é ruim para transferências maiores (a leitura de uma characteristic de 100 bytes, por exemplo, precisaria de vários pacotes em sequência em vez de um só), então o app pede um MTU maior via `requestMtu()`. A palavra "negociar" existe porque **pedir não é o mesmo que receber**: o outro lado da conexão (o periférico, ou às vezes o próprio controlador Bluetooth do Android) pode não suportar o valor pedido e conceder um menor — o valor final só é conhecido quando o callback `onMtuChanged` dispara, e é ele, não o valor pedido, que o código deve usar dali para frente.
+
+Isso aparece direto no callback, em [`BleGattClient.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/data/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/data/real/BleGattClient.kt):
+
+```kotlin
+override fun onMtuChanged(connectedGatt: BluetoothGatt, mtu: Int, status: Int) {
+    pendingMtu?.complete(if (status == BluetoothGatt.GATT_SUCCESS) mtu else DEFAULT_ATT_MTU)
+}
+```
+
+`requestMtu(TARGET_MTU)` pede 247 bytes (o teto prático em BLE 4.2+), mas o `mtu` que chega aqui é o valor que **realmente** foi acordado — pode ser 247, pode ser menor, dependendo do que o periférico aceita. Se `status` não for sucesso, o código nem tenta adivinhar um meio-termo: volta para o padrão seguro de 23 bytes (`DEFAULT_ATT_MTU`), porque assumir um valor maior sem confirmação faria transmissões subsequentes falharem. É exatamente esse valor — o que veio no callback, não o que foi pedido — que vira `ConnectionState.Connected(mtu = negotiatedMtu)` em `connect()`.
 
 ## Testar sem hardware BLE
 
