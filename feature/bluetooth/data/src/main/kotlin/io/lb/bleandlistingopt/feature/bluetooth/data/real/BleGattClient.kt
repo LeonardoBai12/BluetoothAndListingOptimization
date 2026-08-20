@@ -11,6 +11,8 @@ import android.content.Context
 import io.lb.bleandlistingopt.core.common.Resource
 import io.lb.bleandlistingopt.feature.bluetooth.domain.model.CharacteristicValue
 import io.lb.bleandlistingopt.feature.bluetooth.domain.model.ConnectionState
+import io.lb.bleandlistingopt.feature.bluetooth.domain.model.GattCharacteristicInfo
+import io.lb.bleandlistingopt.feature.bluetooth.domain.model.GattServiceInfo
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -184,6 +186,22 @@ class BleGattClient(
         _connectionState.value = ConnectionState.Disconnected
     }
 
+    // Not queued: discoverServices() already ran (in connect()) and
+    // BluetoothGatt is just holding its result in memory -- reading
+    // gatt.services here is a local lookup, not a new radio call, so there's
+    // nothing to serialize it against.
+    fun discoveredServices(): List<GattServiceInfo> = gatt?.services.orEmpty().map { service ->
+        GattServiceInfo(
+            uuid = service.uuid.toString(),
+            characteristics = service.characteristics.map { characteristic ->
+                GattCharacteristicInfo(
+                    uuid = characteristic.uuid.toString(),
+                    properties = characteristicPropertyNames(characteristic.properties),
+                )
+            },
+        )
+    }
+
     suspend fun readCharacteristic(serviceUuid: UUID, characteristicUuid: UUID): Resource<CharacteristicValue> =
         operationQueue.enqueue {
             val characteristic = gatt?.getService(serviceUuid)?.getCharacteristic(characteristicUuid)
@@ -227,4 +245,13 @@ class BleGattClient(
             if (!started) return@enqueue Resource.Error("writeDescriptor() rejected")
             if (deferred.await()) Resource.Success(Unit) else Resource.Error("Enabling notifications failed")
         }
+}
+
+/** Decodes BluetoothGattCharacteristic's properties bitmask into the flag names GATT itself defines. */
+private fun characteristicPropertyNames(properties: Int): List<String> = buildList {
+    if (properties and BluetoothGattCharacteristic.PROPERTY_READ != 0) add("READ")
+    if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0) add("WRITE")
+    if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0) add("WRITE_NO_RESPONSE")
+    if (properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0) add("NOTIFY")
+    if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) add("INDICATE")
 }

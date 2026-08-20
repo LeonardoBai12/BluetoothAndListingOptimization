@@ -15,6 +15,7 @@ import io.lb.bleandlistingopt.feature.bluetooth.data.di.BluetoothDependencies
 @Component(dependencies = [BluetoothDependencies::class], modules = [BluetoothDataModule::class])
 interface BluetoothComponent {
     fun viewModelFactory(): BluetoothViewModelFactory
+    fun gattExplorerViewModelFactory(): GattExplorerViewModelFactory
 
     @Component.Factory
     interface Factory {

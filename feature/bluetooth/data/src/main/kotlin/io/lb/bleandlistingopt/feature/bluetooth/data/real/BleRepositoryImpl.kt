@@ -7,6 +7,7 @@ import io.lb.bleandlistingopt.core.common.Resource
 import io.lb.bleandlistingopt.feature.bluetooth.domain.model.BleDevice
 import io.lb.bleandlistingopt.feature.bluetooth.domain.model.CharacteristicValue
 import io.lb.bleandlistingopt.feature.bluetooth.domain.model.ConnectionState
+import io.lb.bleandlistingopt.feature.bluetooth.domain.model.GattServiceInfo
 import io.lb.bleandlistingopt.feature.bluetooth.domain.repository.BleRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
@@ -52,6 +53,8 @@ class BleRepositoryImpl @Inject constructor(
         value: ByteArray,
     ): Resource<Unit> =
         clientFor(address).writeCharacteristic(UUID.fromString(serviceUuid), UUID.fromString(characteristicUuid), value)
+
+    override fun discoveredServices(address: String): List<GattServiceInfo> = clientFor(address).discoveredServices()
 
     override fun observeNotifications(
         address: String,

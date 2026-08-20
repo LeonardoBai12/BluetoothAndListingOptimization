@@ -4,6 +4,7 @@ import io.lb.bleandlistingopt.core.common.Resource
 import io.lb.bleandlistingopt.feature.bluetooth.domain.model.BleDevice
 import io.lb.bleandlistingopt.feature.bluetooth.domain.model.CharacteristicValue
 import io.lb.bleandlistingopt.feature.bluetooth.domain.model.ConnectionState
+import io.lb.bleandlistingopt.feature.bluetooth.domain.model.GattServiceInfo
 import io.lb.bleandlistingopt.feature.bluetooth.domain.repository.BleRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -41,6 +42,10 @@ class WriteCharacteristicUseCase @Inject constructor(private val repository: Ble
         characteristicUuid: String,
         value: ByteArray,
     ): Resource<Unit> = repository.writeCharacteristic(address, serviceUuid, characteristicUuid, value)
+}
+
+class GetDiscoveredServicesUseCase @Inject constructor(private val repository: BleRepository) {
+    operator fun invoke(address: String): List<GattServiceInfo> = repository.discoveredServices(address)
 }
 
 class ObserveNotificationsUseCase @Inject constructor(private val repository: BleRepository) {

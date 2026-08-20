@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.lb.bleandlistingopt.feature.bluetooth.domain.model.ConnectionState
+import io.lb.bleandlistingopt.feature.bluetooth.presentation.services.GattExplorerActivity
 
 /**
  * API 31+ requests BLUETOOTH_SCAN + BLUETOOTH_CONNECT; below that, scanning
@@ -101,10 +102,19 @@ private fun ScanSection(state: BluetoothState, onEvent: (BluetoothEvent) -> Unit
 
 @Composable
 private fun ConnectionSection(state: BluetoothState, onEvent: (BluetoothEvent) -> Unit) {
+    val context = LocalContext.current
     Text("Address: ${state.selectedAddress}")
     Text("State: ${connectionStateLabel(state.connectionState)}")
 
     if (state.connectionState is ConnectionState.Connected) {
+        Button(
+            onClick = {
+                val address = state.selectedAddress ?: return@Button
+                context.startActivity(GattExplorerActivity.newIntent(context, address))
+            },
+        ) {
+            Text("View GATT table")
+        }
         Button(onClick = { onEvent(BluetoothEvent.OnReadClick) }) {
             Text("Read heart rate characteristic")
         }

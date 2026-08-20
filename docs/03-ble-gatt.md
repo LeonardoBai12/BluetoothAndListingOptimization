@@ -116,6 +116,44 @@ Quando o protocolo é proprietário e a documentação não está disponível, o
 
 Nada disso muda o código deste projeto: a fila serializada, o `CompletableDeferred` por operação, e `writeCharacteristic` continuam sendo exatamente o mecanismo certo para enviar qualquer comando, de qualquer protocolo — a única coisa que muda de um dispositivo padronizado para um proprietário é **de onde vêm** o UUID e o formato do byte, não como a escrita é feita.
 
+### O passo 1 desse workflow, dentro do próprio app
+
+O passo 1 acima ("explorar a tabela GATT primeiro") não precisa do nRF Connect necessariamente — é só ler `BluetoothGatt.services`, que já está em memória depois que `discoverServices()` roda dentro de `connect()`. Depois de conectar, a tela de Bluetooth tem um botão "View GATT table" que abre exatamente essa exploração, numa tela própria:
+[`GattExplorerActivity`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/presentation/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/presentation/services/GattExplorerActivity.kt) /
+[`GattExplorerScreen`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/presentation/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/presentation/services/GattExplorerScreen.kt) —
+num pacote (e `ViewModel`/`State`) próprios, separados da tela de conectar/ler/escrever, pelo mesmo motivo de SRP do resto do projeto: "mostrar a tabela GATT" é uma responsabilidade diferente de "gerenciar a conexão".
+
+[`BleGattClient.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/data/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/data/real/BleGattClient.kt):
+
+```kotlin
+// Não passa pela fila: discoverServices() já rodou (dentro de connect()) e
+// BluetoothGatt já está guardando o resultado em memória -- ler
+// gatt.services aqui é uma consulta local, não uma nova chamada de rádio,
+// então não tem nada contra o que serializar.
+fun discoveredServices(): List<GattServiceInfo> = gatt?.services.orEmpty().map { service ->
+    GattServiceInfo(
+        uuid = service.uuid.toString(),
+        characteristics = service.characteristics.map { characteristic ->
+            GattCharacteristicInfo(
+                uuid = characteristic.uuid.toString(),
+                properties = characteristicPropertyNames(characteristic.properties),
+            )
+        },
+    )
+}
+
+/** Decodifica o bitmask de properties de BluetoothGattCharacteristic nos nomes que o próprio GATT define. */
+private fun characteristicPropertyNames(properties: Int): List<String> = buildList {
+    if (properties and BluetoothGattCharacteristic.PROPERTY_READ != 0) add("READ")
+    if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE != 0) add("WRITE")
+    if (properties and BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE != 0) add("WRITE_NO_RESPONSE")
+    if (properties and BluetoothGattCharacteristic.PROPERTY_NOTIFY != 0) add("NOTIFY")
+    if (properties and BluetoothGattCharacteristic.PROPERTY_INDICATE != 0) add("INDICATE")
+}
+```
+
+Isso é literalmente o mesmo dado que o nRF Connect mostra: cada service, cada characteristic dentro dele, e as properties de cada uma (`READ`/`WRITE`/`NOTIFY`/...). Continua valendo a limitação da seção anterior: isso mostra a *forma* do protocolo, nunca o *significado* dos bytes — para um dispositivo proprietário, essa tela responde "essa characteristic aceita escrita" e não muito mais, o resto ainda depende de documentação do fabricante ou engenharia reversa.
+
 ## Conectar, descobrir serviços, negociar MTU — nessa ordem
 
 ```kotlin
