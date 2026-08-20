@@ -154,6 +154,83 @@ private fun characteristicPropertyNames(properties: Int): List<String> = buildLi
 
 Isso é literalmente o mesmo dado que o nRF Connect mostra: cada service, cada characteristic dentro dele, e as properties de cada uma (`READ`/`WRITE`/`NOTIFY`/...). Continua valendo a limitação da seção anterior: isso mostra a *forma* do protocolo, nunca o *significado* dos bytes — para um dispositivo proprietário, essa tela responde "essa characteristic aceita escrita" e não muito mais, o resto ainda depende de documentação do fabricante ou engenharia reversa.
 
+### O passo 3 desse workflow, também dentro do próprio app
+
+O passo 3 da lista acima ("testar hipóteses manualmente", escrever bytes arbitrários numa characteristic e observar a reação) também não precisa sair do app: toda characteristic com a property `WRITE` ou `WRITE_NO_RESPONSE` ganha, na própria tela do GATT Explorer, um campo de texto para digitar bytes em hexadecimal e um botão para enviar.
+
+[`GattExplorerScreen.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/presentation/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/presentation/services/GattExplorerScreen.kt):
+
+```kotlin
+@Composable
+private fun CharacteristicRow(characteristic: GattCharacteristicInfo, onWrite: (hex: String) -> Unit) {
+    Column {
+        Text("  • ${characteristic.uuid}  [${characteristic.properties.joinToString()}]")
+
+        val canWrite = "WRITE" in characteristic.properties || "WRITE_NO_RESPONSE" in characteristic.properties
+        if (canWrite) {
+            var hexInput by remember(characteristic.uuid) { mutableStateOf("") }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextField(
+                    value = hexInput,
+                    onValueChange = { hexInput = it },
+                    placeholder = { Text("01 0A FF") },
+                )
+                Button(onClick = { onWrite(hexInput) }) {
+                    Text("Send")
+                }
+            }
+        }
+    }
+}
+```
+
+O campo aceita o hexadecimal do jeito que normalmente aparece numa especificação ou num log capturado no Wireshark — pares de dois dígitos separados por espaço (`01 0A FF`) — e converte para `ByteArray` antes de chamar `writeCharacteristic`. Essa conversão é a parte que merece atenção, porque é onde um palpite errado de formato vira um bug silencioso em vez de um erro visível:
+
+[`GattExplorerViewModel.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/bluetooth/presentation/src/main/kotlin/io/lb/bleandlistingopt/feature/bluetooth/presentation/services/GattExplorerViewModel.kt):
+
+```kotlin
+private fun write(serviceUuid: String, characteristicUuid: String, hexValue: String) {
+    val bytes = hexValue.decodeHex()
+    if (bytes == null) {
+        viewModelScope.launch {
+            _effects.emit(GattExplorerEffect.ShowWriteResult("Invalid hex -- use pairs like 01 0A FF"))
+        }
+        return
+    }
+
+    viewModelScope.launch {
+        val result = writeCharacteristic(_state.value.address, serviceUuid, characteristicUuid, bytes)
+        val message = when (result) {
+            is Resource.Success -> "Wrote ${bytes.joinToString("") { "%02X".format(it) }} successfully"
+            is Resource.Error -> result.message ?: "Write failed"
+            Resource.Loading -> return@launch
+        }
+        _effects.emit(GattExplorerEffect.ShowWriteResult(message))
+    }
+}
+
+/**
+ * "01 0A FF" ou "010AFF" -> os bytes correspondentes -- espaço só é aceito
+ * *entre* pares, nunca *dentro* de um, então "0 1" continua inválido em vez
+ * de virar silenciosamente 0x01.
+ */
+private fun String.decodeHex(): ByteArray? {
+    val cleaned = trim().split(Regex("\\s+")).joinToString("")
+    if (cleaned.isEmpty() || cleaned.length % 2 != 0) return null
+    return try {
+        ByteArray(cleaned.length / 2) { i ->
+            cleaned.substring(i * 2, i * 2 + 2).toInt(16).toByte()
+        }
+    } catch (_: NumberFormatException) {
+        null
+    }
+}
+```
+
+Por que `decodeHex()` retorna `null` em vez de simplesmente ignorar caracteres inválidos ou arredondar um número ímpar de dígitos: ao testar hipótese de protocolo manualmente, um erro de digitação que vira silenciosamente um byte diferente do que foi digitado é pior que nenhum resultado — o teste seguinte ("o dispositivo reagiu a `0x2A`?") ficaria respondendo uma pergunta que não foi essa. Rejeitar entrada ambígua e mostrar isso no Snackbar (`"Invalid hex -- use pairs like 01 0A FF"`) mantém o ciclo de tentativa e erro do passo 3 confiável: cada escrita que chega ao dispositivo corresponde exatamente aos bytes que a pessoa pretendia enviar.
+
+O resultado da escrita — sucesso com os bytes exatos que foram enviados, ou o erro devolvido pela fila de operações — chega na tela pelo mesmo mecanismo Effect/Snackbar de sempre (`GattExplorerEffect.ShowWriteResult` coletado num `LaunchedEffect(Unit)` que aciona `SnackbarHostState.showSnackbar`), o mesmo padrão MVI de efeito único usado no resto do projeto para "algo aconteceu uma vez, e a tela precisa mostrar isso sem virar estado permanente".
+
 ## Conectar, descobrir serviços, negociar MTU — nessa ordem
 
 ```kotlin
