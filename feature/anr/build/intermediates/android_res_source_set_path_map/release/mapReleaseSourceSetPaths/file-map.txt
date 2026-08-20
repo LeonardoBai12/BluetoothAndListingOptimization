@@ -1,9 +1,0 @@
-io.lb.bleandlistingopt.feature.anr-pngs-0 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/anr/build/generated/res/pngs/release
-io.lb.bleandlistingopt.feature.anr-updated_navigation_xml-1 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/anr/build/generated/updated_navigation_xml/release
-io.lb.bleandlistingopt.feature.anr-mergeReleaseResources-2 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/anr/build/intermediates/incremental/release/mergeReleaseResources/merged.dir
-io.lb.bleandlistingopt.feature.anr-mergeReleaseResources-3 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/anr/build/intermediates/incremental/release/mergeReleaseResources/stripped.dir
-io.lb.bleandlistingopt.feature.anr-release-4 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/anr/build/intermediates/merged_res/release/mergeReleaseResources
-io.lb.bleandlistingopt.feature.anr-release-5 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/anr/build/intermediates/packaged_res/release/packageReleaseResources
-io.lb.bleandlistingopt.feature.anr-main-6 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/anr/src/main/res
-io.lb.bleandlistingopt.feature.anr-release-7 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/feature/anr/src/release/res
-gradleHome-0 /Users/leonardobai/.gradle

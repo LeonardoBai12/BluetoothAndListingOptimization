@@ -1,1 +1,0 @@
-io.lb.bleandlistingopt.core.designsystem

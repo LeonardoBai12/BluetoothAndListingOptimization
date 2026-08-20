@@ -1,9 +1,0 @@
-io.lb.bleandlistingopt.core.designsystem-pngs-0 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/core/designsystem/build/generated/res/pngs/release
-io.lb.bleandlistingopt.core.designsystem-updated_navigation_xml-1 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/core/designsystem/build/generated/updated_navigation_xml/release
-io.lb.bleandlistingopt.core.designsystem-mergeReleaseResources-2 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/core/designsystem/build/intermediates/incremental/release/mergeReleaseResources/merged.dir
-io.lb.bleandlistingopt.core.designsystem-mergeReleaseResources-3 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/core/designsystem/build/intermediates/incremental/release/mergeReleaseResources/stripped.dir
-io.lb.bleandlistingopt.core.designsystem-release-4 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/core/designsystem/build/intermediates/merged_res/release/mergeReleaseResources
-io.lb.bleandlistingopt.core.designsystem-release-5 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/core/designsystem/build/intermediates/packaged_res/release/packageReleaseResources
-io.lb.bleandlistingopt.core.designsystem-main-6 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/core/designsystem/src/main/res
-io.lb.bleandlistingopt.core.designsystem-release-7 /Users/leonardobai/Projetos/BluetoothAndListingOptimization/core/designsystem/src/release/res
-gradleHome-0 /Users/leonardobai/.gradle

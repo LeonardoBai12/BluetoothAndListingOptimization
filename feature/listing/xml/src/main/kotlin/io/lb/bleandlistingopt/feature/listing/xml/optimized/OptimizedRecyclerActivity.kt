@@ -10,21 +10,19 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import io.lb.bleandlistingopt.feature.listing.xml.ListingEvent
-import io.lb.bleandlistingopt.feature.listing.xml.ListingViewModel
 import io.lb.bleandlistingopt.feature.listing.xml.databinding.ActivityOptimizedRecyclerBinding
 import kotlinx.coroutines.launch
 
 class OptimizedRecyclerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOptimizedRecyclerBinding
-    private val viewModel by lazy { ViewModelProvider(this)[ListingViewModel::class.java] }
+    private val viewModel by lazy { ViewModelProvider(this)[OptimizedRecyclerViewModel::class.java] }
 
     // FIX: one pool shared by every row's nested tags RecyclerView, handed
     // to the adapter instead of each row building its own.
     private val sharedTagsPool = RecyclerView.RecycledViewPool()
     private val adapter = OptimizedRecyclerAdapter(
         sharedTagsPool = sharedTagsPool,
-        onFavoriteToggle = { id -> viewModel.onEvent(ListingEvent.OnFavoriteToggle(id)) },
+        onFavoriteToggle = { id -> viewModel.onEvent(OptimizedRecyclerEvent.OnFavoriteToggle(id)) },
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +46,7 @@ class OptimizedRecyclerActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
             override fun afterTextChanged(s: Editable?) {
-                viewModel.onEvent(ListingEvent.OnQueryChange(s?.toString().orEmpty()))
+                viewModel.onEvent(OptimizedRecyclerEvent.OnQueryChange(s?.toString().orEmpty()))
             }
         })
 
