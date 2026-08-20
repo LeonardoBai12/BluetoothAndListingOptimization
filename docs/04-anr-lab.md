@@ -1,9 +1,18 @@
-# ANR Lab: os 4 pares problema/solução lado a lado
+---
+layout: default
+title: "ANR Lab"
+nav_order: 5
+---
 
-*Event na prática — 4 problemas, 4 soluções, o mesmo trabalho em cada par*
+# ANR Lab
 
-O `AnrEvent` visto em [Event](./04-event.md) tem 8 variantes — 4 problemas e 4 soluções, em pares. Aqui estão as 4 implementações completas, direto de
-[`AnrViewModel.kt`](../feature/anr/src/main/kotlin/io/lb/bleandlistingopt/feature/anr/AnrViewModel.kt): para cada par, o problema e a solução fazem **exatamente o mesmo trabalho** — a única diferença é qual thread faz esse trabalho.
+*4 problemas, 4 soluções, o mesmo trabalho em cada par*
+
+O timeout de despacho de input do Android é de **~5s**: se a thread principal não devolver o controle nesse tempo depois de um toque, o sistema mostra o diálogo de "app não está respondendo". Os 4 pares abaixo, direto de
+[`AnrViewModel.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/anr/src/main/kotlin/io/lb/bleandlistingopt/feature/anr/AnrViewModel.kt), travam a main thread por ~6s de formas diferentes — para cada par, o problema e a solução fazem **exatamente o mesmo trabalho**; a única diferença é qual thread faz esse trabalho.
+
+Para o fluxo completo de como puxar e ler o trace de um ANR (`adb pull /data/anr/traces.txt`, como ler a stack da thread `"main"`) e como isso se conecta ao Crashlytics via `ApplicationExitInfo`, veja o
+[README do módulo `feature:anr`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/anr/README.md).
 
 ## Par 1 — `Thread.sleep()`
 
@@ -73,7 +82,7 @@ private fun triggerDiskRead() {
 }
 ```
 
-Escritas síncronas com `fd.sync()` a cada pedaço — cada `sync()` bloqueia até o SO confirmar que o dado chegou no disco de verdade. É exatamente o tipo de chamada que a política de disk-write do StrictMode (ativada só nesta tela, veja [`StrictModeSetup.kt`](../feature/anr/src/main/kotlin/io/lb/bleandlistingopt/feature/anr/StrictModeSetup.kt)) sinaliza sozinha, independente de rodar tempo suficiente para também causar um ANR.
+Escritas síncronas com `fd.sync()` a cada pedaço — cada `sync()` bloqueia até o SO confirmar que o dado chegou no disco de verdade. É exatamente o tipo de chamada que a política de disk-write do StrictMode (ativada só nesta tela, veja [`StrictModeSetup.kt`](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/anr/src/main/kotlin/io/lb/bleandlistingopt/feature/anr/StrictModeSetup.kt)) sinaliza sozinha, independente de rodar tempo suficiente para também causar um ANR.
 
 *Solução — `OnFixDiskRead`*
 
@@ -138,6 +147,19 @@ As duas threads agora travam `lockA` primeiro, sempre. Sem espera circular poss�
 
 Repare que os 4 problemas **e** as 4 soluções reaproveitam o mesmo trabalho de base (`countPrimesFor`, `blockingDiskWork`, os mesmos `lockA`/`lockB`). Isso não é coincidência — é o que prova que o problema nunca foi *o que* o código faz, e sim *em qual thread* ele roda.
 
+## Debugando: Android Studio
+
+- **Profiler → Threads, ao vivo.** Abra o Profiler (View → Tool Windows → Profiler) *antes* de tocar em "Trigger ANR" e olhe a aba Threads. A thread `main` muda de verde para amarelo/vermelho assim que entra em `Thread.sleep`/trabalho de CPU/I/O. No **Par 4 (deadlock)**, é aqui que fica mais óbvio: o Profiler desenha as duas threads bloqueadas uma na outra, com o ícone de lock indicando exatamente qual monitor cada uma está esperando — é a forma mais rápida de *ver* uma espera circular sem precisar ler stack trace nenhuma.
+- **Logcat detecta o ANR sozinho.** Quando o watchdog dispara, o Logcat mostra uma entrada `ActivityManager: ANR in io.lb.bleandlistingopt` com um link clicável "Show details" — abre a stack da main thread direto no editor, sem precisar puxar arquivo nenhum na mão.
+- **Analisar um trace já puxado.** Depois de `adb pull /data/anr/traces.txt` (veja o [README do módulo](https://github.com/LeonardoBai12/BluetoothAndListingOptimization/blob/main/feature/anr/README.md)), abra o arquivo no Android Studio e use **Code → Analyze Stack Trace** (ou cole o conteúdo direto no diálogo) — o Studio linka cada frame de volta para a linha exata do seu código-fonte.
+
+## Debugando: console do Crashlytics
+
+1. **Firebase console → Crashlytics → aba ANRs**, filtrando por versão do app ou dispositivo se precisar isolar o par específico que foi disparado.
+2. Cada issue de ANR abre com a stack da thread `main` em destaque, mas a aba **Threads** do relatório mostra as *outras* threads também no mesmo instante — essencial no **Par 4**, onde a causa raiz está na thread que segura o lock, não na `main` que só está esperando.
+3. A aba **Sessions** mostra o estado do dispositivo (memória, se estava em background, outras respirações do processo) no momento do ANR — útil para distinguir "trava genuína no meu código" de "o sistema matou o processo por outro motivo".
+4. Como o Crashlytics lê o mesmo `ApplicationExitInfo`/`REASON_ANR` que o leitor local do app (veja o README do módulo), o relatório do console só aparece depois do delay normal de upload — a leitura local (`readLastAnrReason()`, mostrada na própria tela ao reabrir o app) é o jeito instantâneo de confirmar que o ANR foi de fato registrado, enquanto o console ainda não atualizou.
+
 ---
 
-[↑ Índice](./index.md) · [Anterior: Como as três peças se conectam](./06-fluxo-completo.md) · [Próximo: Armadilhas comuns →](./08-armadilhas-comuns.md)
+[↑ Índice](./) · [Anterior: Bluetooth (GATT)](./03-ble-gatt/)

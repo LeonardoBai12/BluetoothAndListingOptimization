@@ -4,7 +4,7 @@
 
 Cada anti-padrão é anotado com **por que** é lento; cada correção, com o **mecanismo exato** que resolve. Este é um artefato de aprendizado, não um produto — clareza da lição vale mais que abstração.
 
-📖 **Guia de State, Event, Effect e SRP:** [`docs/index.md`](docs/index.md)
+📖 **Leia o guia online:** [leonardobai12.github.io/BluetoothAndListingOptimization](https://leonardobai12.github.io/BluetoothAndListingOptimization/)
 
 ---
 
@@ -43,4 +43,6 @@ Usado só para o ANR Lab poder mostrar o fluxo completo: forçar um ANR, deixar 
 
 ## Documentação
 
-O guia completo de **State**, **Event**, **Effect** e o **Princípio da Responsabilidade Única (SRP)** aplicado neste projeto está em [`docs/`](docs/index.md), organizado em capítulos e sempre linkando para o arquivo real do código quando possível.
+O guia completo — RecyclerView, Compose (LazyColumn), Bluetooth (GATT) e ANR Lab, cada anti-padrão junto da sua correção — está em [`docs/`](docs/index.md) ([online](https://leonardobai12.github.io/BluetoothAndListingOptimization/)), organizado em capítulos e sempre linkando para o arquivo real do código no GitHub. Para conceitos gerais de arquitetura (SOLID, MVI, State/Event/Effect), veja o [Advanced Kotlin & Android Engineering](https://leonardobai12.github.io/AdvancedKotlinAndroidEngineering/) — esse guia fica focado só no que é específico deste projeto.
+
+Publicado via Jekyll + [just-the-docs](https://github.com/just-the-docs/just-the-docs), mesmo setup do Advanced Kotlin & Android Engineering — build em [`.github/workflows/jekyll.yml`](.github/workflows/jekyll.yml).

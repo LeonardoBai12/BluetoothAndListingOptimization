@@ -1,0 +1,63 @@
+theme: just-the-docs
+
+# -------------------------
+# Site metadata
+# -------------------------
+title: Android Fundamentals Lab
+description: >-
+  Guia de State, Event, Effect e SRP (Single Responsibility Principle),
+  usando o código real do projeto Android Fundamentals Lab como exemplo.
+
+url: "https://leonardobai12.github.io"
+baseurl: "/BluetoothAndListingOptimization"
+
+lang: pt-BR
+timezone: America/Sao_Paulo
+
+# -------------------------
+# Just-the-Docs settings
+# -------------------------
+color_scheme: dark
+search_enabled: true
+heading_anchors: true
+
+aux_links:
+  "GitHub":
+    - "https://github.com/LeonardoBai12/BluetoothAndListingOptimization"
+
+# -------------------------
+# Jekyll build settings
+# -------------------------
+permalink: pretty
+
+exclude:
+  - "*.gem"
+  - "*.gemspec"
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .bundle
+  - .sass-cache
+  - .jekyll-cache
+
+# Markdown processor
+markdown: kramdown
+highlighter: rouge
+
+kramdown:
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: highlight
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
+
+# -------------------------
+# Plugins
+# -------------------------
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
